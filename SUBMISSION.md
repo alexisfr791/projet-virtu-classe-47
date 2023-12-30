@@ -101,8 +101,11 @@ docker run \
         -d \
         alexisfr-virtu-seed-data:cmd
 ```
-Une fois les conteneurs lancer il ne reste plus qu'à aller sur le http://<docker-host>:5001 pour la page résultat et le http://<docker-host>:5002 pour la page vote
 
+Une fois les conteneurs lancer il ne reste plus qu'à aller sur :  
+Page résultat : http://<docker-host>:5001\
+Page vote : http://<docker-host>:5002 
+---
 ### 6. Arrêter les conteneurs 
 ```bash
 docker stop db redis result vote worker
@@ -222,5 +225,5 @@ docker compose up --build
 docker compose down
 ```
 Une fois les conteneurs lancer il ne reste plus qu'à aller sur :  
-Page résultat : http://<docker-host>:5001
+Page résultat : http://<docker-host>:5001\
 Page vote : http://<docker-host>:5002 
