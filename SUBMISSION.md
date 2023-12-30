@@ -101,15 +101,126 @@ docker run \
         -d \
         alexisfr-virtu-seed-data:cmd
 ```
-Une fois les conteneurs lancer il ne reste plus qu'à aller sur le http://172.16.50.129:5001 pour la page résultat et le http://172.16.50.129:5002 pour la page vote
+Une fois les conteneurs lancer il ne reste plus qu'à aller sur le http://<docker-host>:5001 pour la page résultat et le http://<docker-host>:5002 pour la page vote
 
 ### 6. Arrêter les conteneurs 
 ```bash
 docker stop db redis result vote worker
 ```
 
+## Étapes de Déploiement avec le fichier Docker compose (version automatique)
 
+### 1. Cloner le Projet
 
+```bash
+git clone https://github.com/pascalito007/esiea-ressources.git
+cd esiea-ressources
+```
+### 2. Création du Docker compose
+```bash
+nano docker-compose.yml
+```
+```yml
+#docker-compose.yml
+version: '3'
 
+services:
+  worker:
+    build:
+      context: ./worker
+      dockerfile: Dockerfile
+    depends_on:
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    networks:
+      - back-tier
 
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - "db-data:/var/lib/postgresql/data"
+      - "./healthchecks:/healthchecks"
+    healthcheck:
+      test: /healthchecks/postgres.sh
+      interval: "5s"
+    networks:
+      - back-tier
 
+  redis:
+    image: redis
+    volumes:
+      - "./healthchecks:/healthchecks"
+    healthcheck:
+      test: /healthchecks/redis.sh
+      interval: "5s"
+    networks:
+      - back-tier
+
+  vote:
+    build:
+      context: ./vote
+      dockerfile: Dockerfile
+    ports:
+      - "5002:80"
+    volumes:
+      - ./vote:/usr/local/app
+    networks:
+      - front-tier
+      - back-tier
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  seed-data:
+    build:
+      context: ./seed-data
+      dockerfile: Dockerfile
+    depends_on:
+      vote:
+        condition: service_healthy
+    restart: "no"
+    networks:
+      - front-tier
+
+  result:
+    build:
+      context: ./result
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./result:/usr/local/app
+    ports:
+      - "5001:80"
+      - "127.0.0.1:9229:9229"
+    entrypoint: ["nodemon", "--inspect=0.0.0.0", "server.js"]
+    networks:
+      - front-tier
+      - back-tier
+
+networks:
+  back-tier:
+  front-tier:
+
+volumes:
+  db-data:
+```
+### 3. Lancer le Docker compose
+```bash
+docker compose up --build
+```
+### 4. Arrêter le Docker compose
+```bash
+docker compose down
+```
+Une fois les conteneurs lancer il ne reste plus qu'à aller sur :  
+Page résultat : http://<docker-host>:5001
+Page vote : http://<docker-host>:5002 
