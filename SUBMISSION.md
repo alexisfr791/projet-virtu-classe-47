@@ -103,14 +103,14 @@ docker run \
 ```
 
 Une fois les conteneurs lancer il ne reste plus qu'à aller sur :  
-Page résultat : http://<docker-host>:5001\
+Page résultat : http://<docker-host>:5001 \
 Page vote : http://<docker-host>:5002 
----
+
 ### 6. Arrêter les conteneurs 
 ```bash
 docker stop db redis result vote worker
 ```
-
+---
 ## Étapes de Déploiement avec le fichier Docker compose (version automatique)
 
 ### 1. Cloner le Projet
@@ -225,5 +225,5 @@ docker compose up --build
 docker compose down
 ```
 Une fois les conteneurs lancer il ne reste plus qu'à aller sur :  
-Page résultat : http://<docker-host>:5001\
+Page résultat : http://<docker-host>:5001 \
 Page vote : http://<docker-host>:5002 
